@@ -1,8 +1,11 @@
+// screens/post_list_screen.dart
+
 import 'package:flutter/material.dart';
 import '../models/post.dart';
 import '../services/api_service.dart';
-import '../utils/string_extensions.dart';
-import 'edit_post_screen.dart'; // Import EditPostScreen
+import 'edit_post_screen.dart';
+import 'detail_post_screen.dart';
+import 'add_post_screen.dart';
 
 class PostListScreen extends StatefulWidget {
   @override
@@ -16,21 +19,46 @@ class _PostListScreenState extends State<PostListScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchPosts();
+  }
+
+  void _fetchPosts() {
     _postListFuture = _apiService.getPosts();
   }
 
   Future<void> _refreshPosts() async {
     setState(() {
-      _postListFuture = _apiService.getPosts();
+      _fetchPosts();
     });
   }
 
   Future<void> _deletePost(int? postId, String? imageUrl) async {
     if (postId != null) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Delete Post'),
+          content: Text('Are you sure you want to delete this post?'),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
       try {
-        // Menghapus post dan gambar terkait jika postId tidak null
         await _apiService.deletePost(postId, imageUrl: imageUrl);
-        // Setelah berhasil, refresh daftar post
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Post deleted successfully')),
+        );
         _refreshPosts();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -44,106 +72,220 @@ class _PostListScreenState extends State<PostListScreen> {
     }
   }
 
+  // Get color based on status
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'published':
+        return Colors.green;
+      case 'draft':
+        return Colors.orange;
+      case 'archived':
+        return Colors.grey;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  // Get status text
+  String _getStatusText(String status) {
+    switch (status.toLowerCase()) {
+      case 'published':
+        return 'Published';
+      case 'draft':
+        return 'Draft';
+      case 'archived':
+        return 'Archived';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Widget _buildPostCard(Post post) {
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12), // Increased horizontal margin from 4 to 12
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PostDetailScreen(post: post),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // Image Section
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey[300],
+                ),
+                child: post.image != null && post.image!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          post.image!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                        ),
+                      )
+                    : Icon(Icons.image, size: 50, color: Colors.grey[700]),
+              ),
+              SizedBox(width: 16),
+              // Content Section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title and Status Badge
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            post.title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(post.status).withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _getStatusText(post.status),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    // Content Preview with Right Padding
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0), // Added right padding
+                      child: Text(
+                        post.content,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Action Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Edit Button
+                        IconButton(
+                          icon: Icon(Icons.edit, color: Colors.blueAccent),
+                          tooltip: 'Edit Post',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditPostScreen(post: post),
+                              ),
+                            ).then((_) => _refreshPosts());
+                          },
+                        ),
+                        // Delete Button
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.redAccent),
+                          tooltip: 'Delete Post',
+                          onPressed: () => _deletePost(post.id, post.image),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostList(List<Post> posts) {
+    return RefreshIndicator(
+      onRefresh: _refreshPosts,
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          final post = posts[index];
+          return _buildPostCard(post);
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return FutureBuilder<List<Post>>(
+      future: _postListFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Text(
+              'No posts available.',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+          );
+        }
+
+        final posts = snapshot.data!;
+        return _buildPostList(posts);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Bloggers'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => Navigator.pushNamed(context, '/addPost')
-                .then((_) => _refreshPosts()),
-          ),
-        ],
+        backgroundColor: Colors.blueAccent,
       ),
-      body: FutureBuilder<List<Post>>(
-        future: _postListFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No posts available.'));
-          }
-
-          final posts = snapshot.data!;
-          return RefreshIndicator(
-            onRefresh: _refreshPosts,
-            child: ListView.builder(
-              padding: EdgeInsets.all(8),
-              itemCount: posts.length,
-              itemBuilder: (context, index) {
-                final post = posts[index];
-                return Card(
-                  child: ListTile(
-                    contentPadding: EdgeInsets.all(12),
-                    leading: post.image != null
-                        ? Image.network(
-                            post.image!,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Icon(Icons.image_not_supported),
-                          )
-                        : Icon(Icons.image, size: 60, color: Colors.grey),
-                    title: Text(
-                      post.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 8),
-                        Text(
-                          post.content,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Status: ${post.status.capitalize()}',
-                          style: TextStyle(color: Colors.blueGrey),
-                        ),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            // Navigate to EditPostScreen
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EditPostScreen(post: post),
-                              ),
-                            ).then((_) =>
-                                _refreshPosts()); // Refresh list after edit
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            _deletePost(
-                                post.id, post.image); // Delete post and image
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+      body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddPostScreen(),
             ),
-          );
+          ).then((_) => _refreshPosts());
         },
+        backgroundColor: Colors.blueAccent,
+        child: Icon(Icons.add),
+        tooltip: 'Add Post',
       ),
     );
   }
