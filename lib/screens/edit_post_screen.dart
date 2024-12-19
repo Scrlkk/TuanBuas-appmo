@@ -8,7 +8,7 @@ import '../utils/string_extensions.dart';
 class EditPostScreen extends StatefulWidget {
   final Post post;
 
-  const EditPostScreen({Key? key, required this.post}) : super(key: key);
+  const EditPostScreen({super.key, required this.post});
 
   @override
   _EditPostScreenState createState() => _EditPostScreenState();
@@ -24,9 +24,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
   late String _content;
   String? _image;
   late String _status;
-  late int _categoryId;
-  late int _userId;
-  int? _tagId;
+  final int _userId = 1; // Fixed to 1
 
   @override
   void initState() {
@@ -35,10 +33,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
     _content = widget.post.content;
     _image = widget.post.image;
     _status = widget.post.status;
-    _categoryId = widget.post.categoryId;
-    _userId = widget.post.userId;
-    _tagId = widget.post.tagId;
-
     _imageController.text = _image ?? '';
     _imageController.addListener(_onImageUrlChanged);
   }
@@ -66,15 +60,13 @@ class _EditPostScreenState extends State<EditPostScreen> {
         content: _content,
         image: _image,
         status: _status,
-        categoryId: _categoryId,
-        userId: _userId,
-        tagId: _tagId,
+        userId: _userId, // Set to 1
       );
 
       try {
         await _apiService.updatePost(widget.post.id!, updatedPost);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post updated successfully')),
+          const SnackBar(content: Text('Post updated successfully')),
         );
         Navigator.pop(context);
       } catch (error) {
@@ -94,18 +86,18 @@ class _EditPostScreenState extends State<EditPostScreen> {
           height: 150,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-              Icon(Icons.broken_image, size: 100, color: Colors.grey),
+              const Icon(Icons.broken_image, size: 100, color: Colors.grey),
         ),
       );
     }
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Post'),
+        title: const Text('Edit Post'),
         backgroundColor: Colors.blueAccent,
       ),
       body: GestureDetector(
@@ -127,7 +119,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                     // Title Field
                     TextFormField(
                       initialValue: _title,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Title',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.title, color: Colors.blue),
@@ -140,11 +132,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       },
                       onSaved: (value) => _title = value!.trim(),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Content Field
                     TextFormField(
                       initialValue: _content,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Content',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.description, color: Colors.blue),
@@ -158,11 +150,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       },
                       onSaved: (value) => _content = value!.trim(),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Image URL Field
                     TextFormField(
                       controller: _imageController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Image URL (Optional)',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.image, color: Colors.blue),
@@ -170,11 +162,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       keyboardType: TextInputType.url,
                     ),
                     _buildImagePreview(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Status Dropdown
                     DropdownButtonFormField<String>(
                       value: _status,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Status',
                         border: OutlineInputBorder(),
                       ),
@@ -188,64 +180,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                         _status = value!;
                       }),
                     ),
-                    SizedBox(height: 20),
-                    // Category ID Field
-                    TextFormField(
-                      initialValue: _categoryId.toString(),
-                      decoration: InputDecoration(
-                        labelText: 'Category ID',
-                        border: OutlineInputBorder(),
-                        prefixIcon:
-                            Icon(Icons.category, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null ||
-                            int.tryParse(value.trim()) == null) {
-                          return 'Valid category ID is required';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) =>
-                          _categoryId = int.parse(value!.trim()),
-                    ),
-                    SizedBox(height: 20),
-                    // User ID Field
-                    TextFormField(
-                      initialValue: _userId.toString(),
-                      decoration: InputDecoration(
-                        labelText: 'User ID',
-                        border: OutlineInputBorder(),
-                        prefixIcon:
-                            Icon(Icons.person, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null ||
-                            int.tryParse(value.trim()) == null) {
-                          return 'Valid user ID is required';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _userId = int.parse(value!.trim()),
-                    ),
-                    SizedBox(height: 20),
-                    // Tag ID Field
-                    TextFormField(
-                      initialValue: _tagId?.toString(),
-                      decoration: InputDecoration(
-                        labelText: 'Tag ID (Optional)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.tag, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onSaved: (value) {
-                        _tagId = value != null && value.trim().isNotEmpty
-                            ? int.tryParse(value.trim())
-                            : null;
-                      },
-                    ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     // Update Button
                     SizedBox(
                       width: double.infinity,
@@ -253,12 +188,12 @@ class _EditPostScreenState extends State<EditPostScreen> {
                         onPressed: _updatePost,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Update Post',
                           style: TextStyle(fontSize: 18),
                         ),

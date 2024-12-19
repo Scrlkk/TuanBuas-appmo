@@ -8,6 +8,8 @@ import 'detail_post_screen.dart';
 import 'add_post_screen.dart';
 
 class PostListScreen extends StatefulWidget {
+  const PostListScreen({super.key});
+
   @override
   _PostListScreenState createState() => _PostListScreenState();
 }
@@ -37,15 +39,15 @@ class _PostListScreenState extends State<PostListScreen> {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Delete Post'),
-          content: Text('Are you sure you want to delete this post?'),
+          title: const Text('Delete Post'),
+          content: const Text('Are you sure you want to delete this post?'),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.pop(context, false),
             ),
             TextButton(
-              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
               onPressed: () => Navigator.pop(context, true),
             ),
           ],
@@ -57,7 +59,7 @@ class _PostListScreenState extends State<PostListScreen> {
       try {
         await _apiService.deletePost(postId, imageUrl: imageUrl);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post deleted successfully')),
+          const SnackBar(content: Text('Post deleted successfully')),
         );
         _refreshPosts();
       } catch (e) {
@@ -67,7 +69,7 @@ class _PostListScreenState extends State<PostListScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post ID is null, cannot delete post')),
+        const SnackBar(content: Text('Post ID is null, cannot delete post')),
       );
     }
   }
@@ -103,7 +105,9 @@ class _PostListScreenState extends State<PostListScreen> {
   Widget _buildPostCard(Post post) {
     return Card(
       elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12), // Increased horizontal margin from 4 to 12
+      margin: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 12), // Increased horizontal margin from 4 to 12
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
         onTap: () {
@@ -133,12 +137,13 @@ class _PostListScreenState extends State<PostListScreen> {
                           post.image!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                              const Icon(Icons.broken_image,
+                                  size: 50, color: Colors.grey),
                         ),
                       )
                     : Icon(Icons.image, size: 50, color: Colors.grey[700]),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               // Content Section
               Expanded(
                 child: Column(
@@ -150,23 +155,25 @@ class _PostListScreenState extends State<PostListScreen> {
                         Expanded(
                           child: Text(
                             post.title,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(post.status).withOpacity(0.8),
+                            color:
+                                _getStatusColor(post.status).withOpacity(0.8),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _getStatusText(post.status),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -175,38 +182,43 @@ class _PostListScreenState extends State<PostListScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     // Content Preview with Right Padding
                     Padding(
-                      padding: const EdgeInsets.only(right: 8.0), // Added right padding
+                      padding: const EdgeInsets.only(
+                          right: 8.0), // Added right padding
                       child: Text(
                         post.content,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
+                        style: const TextStyle(
+                            fontSize: 14, color: Colors.black54),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     // Action Buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         // Edit Button
                         IconButton(
-                          icon: Icon(Icons.edit, color: Colors.blueAccent),
+                          icon:
+                              const Icon(Icons.edit, color: Colors.blueAccent),
                           tooltip: 'Edit Post',
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EditPostScreen(post: post),
+                                builder: (context) =>
+                                    EditPostScreen(post: post),
                               ),
                             ).then((_) => _refreshPosts());
                           },
                         ),
                         // Delete Button
                         IconButton(
-                          icon: Icon(Icons.delete, color: Colors.redAccent),
+                          icon:
+                              const Icon(Icons.delete, color: Colors.redAccent),
                           tooltip: 'Delete Post',
                           onPressed: () => _deletePost(post.id, post.image),
                         ),
@@ -226,7 +238,7 @@ class _PostListScreenState extends State<PostListScreen> {
     return RefreshIndicator(
       onRefresh: _refreshPosts,
       child: ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         itemCount: posts.length,
         itemBuilder: (context, index) {
           final post = posts[index];
@@ -241,18 +253,18 @@ class _PostListScreenState extends State<PostListScreen> {
       future: _postListFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         } else if (snapshot.hasError) {
           return Center(
             child: Text(
               'Error: ${snapshot.error}',
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
           );
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
+          return const Center(
             child: Text(
               'No posts available.',
               style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -270,7 +282,7 @@ class _PostListScreenState extends State<PostListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bloggers'),
+        title: const Text('Bloggers'),
         backgroundColor: Colors.blueAccent,
       ),
       body: _buildBody(),
@@ -279,13 +291,13 @@ class _PostListScreenState extends State<PostListScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddPostScreen(),
+              builder: (context) => const AddPostScreen(),
             ),
           ).then((_) => _refreshPosts());
         },
         backgroundColor: Colors.blueAccent,
-        child: Icon(Icons.add),
         tooltip: 'Add Post',
+        child: const Icon(Icons.add),
       ),
     );
   }
