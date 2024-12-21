@@ -6,6 +6,8 @@ import '../services/api_service.dart';
 import '../utils/string_extensions.dart';
 
 class AddPostScreen extends StatefulWidget {
+  const AddPostScreen({super.key});
+
   @override
   _AddPostScreenState createState() => _AddPostScreenState();
 }
@@ -20,9 +22,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
   String _content = '';
   String? _image;
   String _status = 'published';
-  int _categoryId = 1;
-  int _userId = 1;
-  int? _tagId;
+  final int _userId = 1; // Fixed to 1
 
   @override
   void initState() {
@@ -52,15 +52,13 @@ class _AddPostScreenState extends State<AddPostScreen> {
         content: _content,
         image: _image,
         status: _status,
-        categoryId: _categoryId,
-        userId: _userId,
-        tagId: _tagId,
+        userId: _userId, // Set to 1
       );
 
       try {
         await _apiService.createPost(newPost);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post created successfully')),
+          const SnackBar(content: Text('Post created successfully')),
         );
         Navigator.pop(context);
       } catch (error) {
@@ -80,18 +78,18 @@ class _AddPostScreenState extends State<AddPostScreen> {
           height: 150,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-              Icon(Icons.broken_image, size: 100, color: Colors.grey),
+              const Icon(Icons.broken_image, size: 100, color: Colors.grey),
         ),
       );
     }
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Post'),
+        title: const Text('Add Post'),
         backgroundColor: Colors.blueAccent,
       ),
       body: GestureDetector(
@@ -112,7 +110,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   children: [
                     // Title Field
                     TextFormField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Title',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.title, color: Colors.blue),
@@ -125,10 +123,10 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       },
                       onSaved: (value) => _title = value!.trim(),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Content Field
                     TextFormField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Content',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.description, color: Colors.blue),
@@ -142,11 +140,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       },
                       onSaved: (value) => _content = value!.trim(),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Image URL Field
                     TextFormField(
                       controller: _imageController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Image URL (Optional)',
                         border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.image, color: Colors.blue),
@@ -154,11 +152,11 @@ class _AddPostScreenState extends State<AddPostScreen> {
                       keyboardType: TextInputType.url,
                     ),
                     _buildImagePreview(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // Status Dropdown
                     DropdownButtonFormField<String>(
                       value: _status,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'Status',
                         border: OutlineInputBorder(),
                       ),
@@ -172,61 +170,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         _status = value!;
                       }),
                     ),
-                    SizedBox(height: 20),
-                    // Category ID Field
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Category ID',
-                        border: OutlineInputBorder(),
-                        prefixIcon:
-                            Icon(Icons.category, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null ||
-                            int.tryParse(value.trim()) == null) {
-                          return 'Valid category ID is required';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) =>
-                          _categoryId = int.parse(value!.trim()),
-                    ),
-                    SizedBox(height: 20),
-                    // User ID Field
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'User ID',
-                        border: OutlineInputBorder(),
-                        prefixIcon:
-                            Icon(Icons.person, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null ||
-                            int.tryParse(value.trim()) == null) {
-                          return 'Valid user ID is required';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _userId = int.parse(value!.trim()),
-                    ),
-                    SizedBox(height: 20),
-                    // Tag ID Field
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Tag ID (Optional)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.tag, color: Colors.blueAccent),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onSaved: (value) {
-                        _tagId = value != null && value.trim().isNotEmpty
-                            ? int.tryParse(value.trim())
-                            : null;
-                      },
-                    ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     // Save Button
                     SizedBox(
                       width: double.infinity,
@@ -234,12 +178,12 @@ class _AddPostScreenState extends State<AddPostScreen> {
                         onPressed: _savePost,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Save Post',
                           style: TextStyle(fontSize: 18),
                         ),

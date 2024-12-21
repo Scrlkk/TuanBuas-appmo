@@ -7,21 +7,21 @@ import '../utils/string_extensions.dart';
 class PostDetailScreen extends StatelessWidget {
   final Post post;
 
-  const PostDetailScreen({Key? key, required this.post}) : super(key: key);
+  const PostDetailScreen({super.key, required this.post});
 
   Widget _buildImage() {
     if (post.image != null && post.image!.isNotEmpty) {
       return Image.network(
         post.image!,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Icon(
+        errorBuilder: (context, error, stackTrace) => const Icon(
           Icons.image_not_supported,
           size: 100,
           color: Colors.grey,
         ),
       );
     }
-    return Icon(Icons.image, size: 100, color: Colors.grey);
+    return const Icon(Icons.image, size: 100, color: Colors.grey);
   }
 
   Widget _buildDetailRow(String label, String value, {Color? color}) {
@@ -31,7 +31,7 @@ class PostDetailScreen extends StatelessWidget {
         children: [
           Text(
             '$label: ',
-            style: TextStyle(
+            style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
@@ -63,48 +63,33 @@ class PostDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image
-            Container(
+            SizedBox(
               width: double.infinity,
               height: 200,
               child: _buildImage(),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             // Title
             Text(
               post.title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             // Status
             _buildDetailRow(
               'Status',
               post.status.capitalize(),
               color: Colors.blueGrey,
             ),
-            // Category ID
-            _buildDetailRow(
-              'Category ID',
-              post.categoryId.toString(),
-            ),
-            // User ID
-            _buildDetailRow(
-              'User ID',
-              post.userId.toString(),
-            ),
-            // Tag ID
-            if (post.tagId != null)
-              _buildDetailRow(
-                'Tag ID',
-                post.tagId.toString(),
-              ),
-            Divider(height: 32, thickness: 1),
+            // Removed Category ID and User ID
+            const Divider(height: 32, thickness: 1),
             // Content
             Text(
               post.content,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 height: 1.5,
               ),

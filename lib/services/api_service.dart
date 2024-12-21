@@ -6,7 +6,7 @@ import '../models/post.dart';
 
 class ApiService {
   // It's better to use a configurable base URL, possibly from environment variables or config files.
-  final String baseUrl = 'http://10.70.131.120:8000/api/posts';
+  final String baseUrl = 'http://192.168.187.25:8000/api/posts';
 
   Future<List<Post>> getPosts() async {
     final response = await http.get(Uri.parse(baseUrl));
@@ -65,6 +65,6 @@ class ApiService {
     // Placeholder implementation:
     print('Deleting image: $imageUrl');
     // Simulate deletion delay
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
   }
 }
