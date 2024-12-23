@@ -1,6 +1,6 @@
 {
-    "name": "uas_crud",
-    "short_name": "uas_crud",
+    "name": "app_mobile",
+    "short_name": "app_mobile",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
